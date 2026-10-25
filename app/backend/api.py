@@ -339,10 +339,10 @@ def record_successful_provider_model(provider_key: str, model: str) -> None:
                 candidate["verified"] = True
                 matched = True
                 break
+        # A candidate may have been intentionally deleted while generation was running.
+        # Do not resurrect it when that in-flight request completes.
         if not matched:
-            if len(candidates) >= 100:
-                candidates = candidates[:99]
-            candidates.append({"id": clean_model, "verified": True})
+            return
         provider["model_candidates"] = candidates
         config = normalize_config(config)
         save_config(current_app.config["CONFIG_FILE"], config)
