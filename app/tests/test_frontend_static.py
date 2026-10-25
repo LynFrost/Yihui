@@ -5483,6 +5483,14 @@ def test_v0742_instance_tag_popover_position_and_clear_action():
         events_js.find("function positionInstanceTagPopover(anchor)") :
         events_js.find("function setInstanceTagPopoverPinned")
     ]
+    pin_setter = events_js[
+        events_js.find("function setInstanceTagPopoverPinned") :
+        events_js.find("function positionActiveInstanceTagPopover")
+    ]
+    active_positioner = events_js[
+        events_js.find("function positionActiveInstanceTagPopover") :
+        events_js.find("function closeInstanceTagPopoverForOutsidePointerDown")
+    ]
     outside_handler = events_js[
         events_js.find("function closeInstanceTagPopoverForOutsidePointerDown(event)") :
         events_js.find("globalThis.positionActiveInstanceTagPopover")
@@ -5497,6 +5505,13 @@ def test_v0742_instance_tag_popover_position_and_clear_action():
     assert 'String(tagPopoverAnchor.dataset.id || "") === pinnedId' in outside_handler
     assert "if (!alreadyPinned) {" in events_js
     assert "setInstanceTagPopoverPinned(instanceId, !alreadyPinned)" not in events_js
+    assert 'document.documentElement.classList.toggle("has-pinned-instance-tag-popover", isPinned);' in pin_setter
+    assert "positionActiveInstanceTagPopover();" in pin_setter
+    assert "if (state.instanceTagPopover?.pinned)" in active_positioner
+    assert active_positioner.find("if (state.instanceTagPopover?.pinned)") < active_positioner.find("const hoveredAnchor")
+    assert "hoveredAnchors.forEach" not in active_positioner
+    assert 'html:not(.has-pinned-instance-tag-popover) .instance-tag-popover-anchor:hover .instance-tag-popover' in css
+    assert 'html.has-pinned-instance-tag-popover .instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover' in css
     assert '(action === "remove-instance-tag" || action === "clear-instance-tags")' in events_js
     assert 'class="instance-tag-popover-header"' in popover_renderer
     assert 'class="instance-tag-popover-chips"' in popover_renderer

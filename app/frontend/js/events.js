@@ -188,35 +188,39 @@ function positionInstanceTagPopover(anchor) {
 }
 function setInstanceTagPopoverPinned(instanceId, pinned) {
   const id = String(instanceId || "");
+  const isPinned = Boolean(pinned && id);
   state.instanceTagPopover = {
-    instanceId: pinned ? id : "",
-    pinned: Boolean(pinned),
+    instanceId: isPinned ? id : "",
+    pinned: isPinned,
   };
+  document.documentElement.classList.toggle("has-pinned-instance-tag-popover", isPinned);
 
   app.querySelectorAll("[data-instance-tag-popover-anchor]").forEach((anchor) => {
-    const isPinned = Boolean(pinned) && String(anchor.dataset.id || "") === id;
-    anchor.classList.toggle("is-popover-pinned", isPinned);
-    if (isPinned) {
-      positionInstanceTagPopover(anchor);
-    }
+    const isAnchorPinned = isPinned && String(anchor.dataset.id || "") === id;
+    anchor.classList.toggle("is-popover-pinned", isAnchorPinned);
   });
+
+  // Position only the pinned popup while one is active. Otherwise position
+  // the single hovered popup, so two records cannot be positioned together.
+  positionActiveInstanceTagPopover();
 }
 
 function positionActiveInstanceTagPopover() {
-  const hoveredAnchors = app.querySelectorAll("[data-instance-tag-popover-anchor]:hover");
-  hoveredAnchors.forEach((anchor) => positionInstanceTagPopover(anchor));
-
-  if (!state.instanceTagPopover?.pinned) {
+  if (state.instanceTagPopover?.pinned) {
+    const pinnedId = String(state.instanceTagPopover.instanceId || "");
+    const pinnedAnchor = [...app.querySelectorAll("[data-instance-tag-popover-anchor]")]
+      .find((anchor) => String(anchor.dataset.id || "") === pinnedId);
+    if (pinnedAnchor) {
+      positionInstanceTagPopover(pinnedAnchor);
+    }
     return;
   }
-  const pinnedId = String(state.instanceTagPopover.instanceId || "");
-  const pinnedAnchor = [...app.querySelectorAll("[data-instance-tag-popover-anchor]")]
-    .find((anchor) => String(anchor.dataset.id || "") === pinnedId);
-  if (pinnedAnchor && !pinnedAnchor.matches(":hover")) {
-    positionInstanceTagPopover(pinnedAnchor);
+
+  const hoveredAnchor = app.querySelector("[data-instance-tag-popover-anchor]:hover");
+  if (hoveredAnchor) {
+    positionInstanceTagPopover(hoveredAnchor);
   }
 }
-
 function closeInstanceTagPopoverForOutsidePointerDown(event) {
   if (!state.instanceTagPopover?.pinned) {
     return;

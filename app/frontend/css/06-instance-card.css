@@ -886,8 +886,8 @@ button.operation-provider-marker {
   transform: translateY(-50%);
 }
 
-.instance-tag-popover-anchor:hover .instance-tag-popover,
-.instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover {
+html:not(.has-pinned-instance-tag-popover) .instance-tag-popover-anchor:hover .instance-tag-popover,
+html.has-pinned-instance-tag-popover .instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover {
   display: flex;
 }
 
