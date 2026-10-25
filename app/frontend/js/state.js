@@ -22,6 +22,7 @@ const state = {
   settingsProviderDraftIsNew: false,
   settingsEditingProvider: "",
   settingsDirty: false,
+  instanceModelDropdownOpenKey: "",
   isComposingPrompt: false,
   saveViewMode: "list",
   saveAreaKeyboardFocus: false,
