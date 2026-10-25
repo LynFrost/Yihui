@@ -539,9 +539,10 @@ function managerHasOpenFloatingControl() {
       || state.operation.clarity_picker_open
       || state.operation.size_picker_open
       || state.operation.resolution_picker_open
+      || Boolean(state.instanceModelDropdownOpenKey)
       || document.querySelector(
         ".generation-path-dropdown, .tag-filter-menu, .tag-selector-menu, "
-          + ".operation-provider-dropdown, .node-menu, .node-context-menu, [data-move-dialog], [data-path-replace-dialog]",
+          + ".operation-provider-dropdown, .instance-model-dropdown, .node-menu, .node-context-menu, [data-move-dialog], [data-path-replace-dialog]",
       ),
   );
 }
@@ -1259,6 +1260,88 @@ function providerForInstanceSubmit(item) {
     throw new Error(`当前实例的 Provider 不存在：${providerKey}`);
   }
   return providerKey;
+}
+
+
+function instanceModelDropdownKey(instanceId, providerKey) {
+  return String(instanceId || "") + ":" + String(providerKey || "");
+}
+
+function toggleInstanceModelDropdown(instanceId, providerKey) {
+  const provider = state.settings?.providers?.[providerKey];
+  if (!provider || !providerKey) {
+    return;
+  }
+  const key = instanceModelDropdownKey(instanceId, providerKey);
+  state.instanceModelDropdownOpenKey = state.instanceModelDropdownOpenKey === key ? "" : key;
+  renderManagerIfActive();
+}
+
+async function addProviderModelCandidate(instanceId, providerKey) {
+  if (!providerKey || !state.settings?.providers?.[providerKey]) {
+    throw new Error("请先为这条记录选择 Provider");
+  }
+  const rawModel = window.prompt("请输入模型 ID", "");
+  if (rawModel === null) {
+    return;
+  }
+  const model = String(rawModel).trim();
+  if (!model) {
+    setMessage("模型 ID 不能为空", "error");
+    return;
+  }
+  const result = await api("/api/provider-models", {
+    method: "POST",
+    body: { action: "add", provider_key: providerKey, model },
+  });
+  state.settings = result.settings;
+  state.instanceModelDropdownOpenKey = instanceModelDropdownKey(instanceId, providerKey);
+  renderManagerIfActive();
+  setMessage(
+    result.changed === false ? "该模型已存在" : "模型已添加（待验证），选中后即可使用",
+    result.changed === false ? "info" : "success",
+  );
+}
+
+async function selectProviderModelCandidate(instanceId, providerKey, model) {
+  const cleanModel = String(model || "").trim();
+  if (!providerKey || !cleanModel) {
+    throw new Error("Provider 或模型 ID 无效");
+  }
+  const result = await api("/api/provider-models", {
+    method: "POST",
+    body: { action: "select", provider_key: providerKey, model: cleanModel },
+  });
+  state.settings = result.settings;
+  state.instanceModelDropdownOpenKey = "";
+  renderManagerIfActive();
+  setMessage(
+    result.changed === false ? "当前模型未变化" : "已切换当前模型：" + cleanModel,
+    result.changed === false ? "info" : "success",
+  );
+}
+
+async function deleteProviderModelCandidate(instanceId, providerKey, model) {
+  const cleanModel = String(model || "").trim();
+  const provider = state.settings?.providers?.[providerKey];
+  if (!provider || !cleanModel) {
+    throw new Error("Provider 或模型 ID 无效");
+  }
+  if (String(provider.model || "").trim() === cleanModel) {
+    setMessage("当前模型不能删除，请先切换到其他模型", "error");
+    return;
+  }
+  if (!window.confirm("确认删除模型“" + cleanModel + "”？")) {
+    return;
+  }
+  const result = await api("/api/provider-models", {
+    method: "POST",
+    body: { action: "delete", provider_key: providerKey, model: cleanModel },
+  });
+  state.settings = result.settings;
+  state.instanceModelDropdownOpenKey = instanceModelDropdownKey(instanceId, providerKey);
+  renderManagerIfActive();
+  setMessage("模型已删除", "success");
 }
 
 function isOpenAIGoogleProviderKey(providerKey) {
