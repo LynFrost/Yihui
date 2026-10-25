@@ -32,6 +32,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "api_key_env": "IMG_API_KEY",
             "api_key": "",
             "model": "gpt-image-2",
+            "model_candidates": [{"id": "gpt-image-2", "verified": False}],
             "openai_call_method": "gpt-image-2",
             "quality": "high",
             "output_format": "png",
@@ -117,6 +118,7 @@ PROVIDER_DEFAULTS: dict[str, Any] = {
     "api_key_env": "IMG_API_KEY",
     "api_key": "",
     "model": "gpt-image-2",
+    "model_candidates": [],
     "openai_call_method": "gpt-image-2",
     "quality": "high",
     "output_format": "png",
@@ -301,6 +303,37 @@ def normalize_bool(value: Any, default: bool = False) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+
+def normalize_provider_model_candidates(
+    value: Any,
+    current_model: Any = "",
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    source = value if isinstance(value, list) else []
+    max_items = max(1, int(limit or 100))
+    normalized: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in source:
+        if isinstance(item, dict):
+            model = str(item.get("id") or item.get("model") or "").strip()
+            verified = normalize_bool(item.get("verified"), False)
+        else:
+            model = str(item or "").strip()
+            verified = False
+        if not model or model in seen:
+            continue
+        normalized.append({"id": model, "verified": verified})
+        seen.add(model)
+        if len(normalized) >= max_items:
+            break
+    current = str(current_model or "").strip()
+    if current and current not in seen:
+        if len(normalized) >= max_items:
+            normalized = normalized[: max_items - 1]
+        normalized.insert(0, {"id": current, "verified": False})
+    return normalized
+
+
 def normalize_code_map(value: Any) -> dict[str, dict[str, str]]:
     if not isinstance(value, dict):
         return {}
@@ -447,9 +480,14 @@ def normalize_providers(providers: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if not has_model or (
             provider["adapter"] == "openai-google"
             and str(raw_model).strip() == "gpt-image-2"
+            and "model_candidates" not in provider_config
         ):
             raw_model = default_model_for_adapter(provider["adapter"])
         provider["model"] = str(raw_model or "").strip()
+        provider["model_candidates"] = normalize_provider_model_candidates(
+            provider.get("model_candidates"),
+            provider["model"],
+        )
         provider["openai_call_method"] = normalize_choice(
             provider.get("openai_call_method"),
             SUPPORTED_OPENAI_CALL_METHODS,
