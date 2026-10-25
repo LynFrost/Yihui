@@ -225,6 +225,84 @@ function renderProviderSourceRow(item, editable) {
   `;
 }
 
+
+function renderInstanceModelSelector(item, pending = false) {
+  const providerKey = String(item?.provider || item?.generation_params?.provider_key || "").trim();
+  const provider = state.settings?.providers?.[providerKey] || null;
+  const currentModel = String(provider?.model || "").trim();
+  const rawCandidates = Array.isArray(provider?.model_candidates) ? provider.model_candidates : [];
+  const candidates = rawCandidates
+    .map((candidate) => {
+      if (typeof candidate === "string") {
+        return { id: candidate.trim(), verified: false };
+      }
+      return {
+        id: String(candidate?.id || candidate?.model || "").trim(),
+        verified: Boolean(candidate?.verified),
+      };
+    })
+    .filter((candidate) => candidate.id);
+  if (currentModel && !candidates.some((candidate) => candidate.id === currentModel)) {
+    candidates.unshift({ id: currentModel, verified: false });
+  }
+  const instanceId = String(item?.id || "");
+  const dropdownKey = `${instanceId}:${providerKey}`;
+  const open = Boolean(providerKey && provider && !pending && state.instanceModelDropdownOpenKey === dropdownKey);
+  const options = candidates.map((candidate) => {
+    const selected = candidate.id === currentModel;
+    const statusClass = candidate.verified ? "is-verified" : "is-pending";
+    const statusText = candidate.verified ? "已验证" : "待验证";
+    const deleteAttrs = selected ? 'disabled title="当前模型不能删除，请先切换模型"' : "";
+    return `
+      <div class="instance-model-option ${selected ? "is-selected" : ""}">
+        <button type="button" class="instance-model-option-main"
+          data-action="select-provider-model-candidate"
+          data-id="${escapeHtml(instanceId)}"
+          data-provider-key="${escapeHtml(providerKey)}"
+          data-model-id="${escapeHtml(candidate.id)}"
+          ${selected ? 'aria-current="true"' : ""}>
+          <span class="instance-model-option-name" title="${escapeHtml(candidate.id)}">${escapeHtml(candidate.id)}</span>
+          <span class="instance-model-option-status ${statusClass}">${statusText}</span>
+        </button>
+        <button type="button" class="instance-model-option-delete"
+          data-action="delete-provider-model-candidate"
+          data-id="${escapeHtml(instanceId)}"
+          data-provider-key="${escapeHtml(providerKey)}"
+          data-model-id="${escapeHtml(candidate.id)}"
+          ${deleteAttrs}
+          aria-label="删除模型 ${escapeHtml(candidate.id)}">×</button>
+      </div>
+    `;
+  }).join("");
+  const disabled = !providerKey || !provider || pending ? "disabled" : "";
+  return `
+    <div class="instance-model-selector ${open ? "is-open" : ""}">
+      <span class="instance-model-label">model</span>
+      <div class="instance-model-combobox">
+        <button type="button" class="instance-model-trigger"
+          data-action="toggle-instance-model-dropdown"
+          data-id="${escapeHtml(instanceId)}"
+          data-provider-key="${escapeHtml(providerKey)}"
+          ${disabled}
+          aria-expanded="${open ? "true" : "false"}"
+          title="${escapeHtml(currentModel || "未设置模型")}">
+          <span class="instance-model-current">${escapeHtml(currentModel || "未设置")}</span>
+          <span class="instance-model-arrow" aria-hidden="true">▾</span>
+        </button>
+        ${open ? `
+          <div class="instance-model-dropdown" data-skip-batch-save="true">
+            ${options || '<div class="instance-model-empty">暂无模型，请添加</div>'}
+            <button type="button" class="instance-model-add"
+              data-action="add-provider-model-candidate"
+              data-id="${escapeHtml(instanceId)}"
+              data-provider-key="${escapeHtml(providerKey)}">＋ 添加模型</button>
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
+
 function instanceNumberLabel(instance) {
   const serverLabel = String(instance?.instance_number_label || "").trim();
   if (serverLabel) {
@@ -355,11 +433,24 @@ function renderInstanceCard(instance) {
   const clearTagsAction = Array.isArray(item.tags) && item.tags.length
     ? `<button type="button" class="instance-clear-tags-chip" data-action="clear-instance-tags" data-id="${escapeHtml(instanceId)}" title="清除标签">X</button>`
     : "";
+  const tagSelector = renderTagSelector({
+    scope: "instance",
+    tags: item.tags,
+    draft: item.tag_draft,
+    editable: tagEditable,
+    instanceId,
+    open: Boolean(item.tag_selector_open),
+  });
   const inlineActions = pending
-    ? ""
+    ? `
+      <div class="instance-inline-actions is-pending">
+        ${tagSelector}
+      </div>
+    `
     : failed
       ? `
         <div class="instance-inline-actions">
+          ${tagSelector}
           ${clearTagsAction}
           <button type="button" data-action="bring-instance-to-operation" data-id="${escapeHtml(instanceId)}">带入</button>
           ${copyAction}
@@ -368,12 +459,14 @@ function renderInstanceCard(instance) {
       `
       : `
         <div class="instance-inline-actions">
+          ${tagSelector}
           ${clearTagsAction}
           <button type="button" data-action="bring-instance-to-operation" data-id="${escapeHtml(instanceId)}">带入</button>
           ${copyAction}
           ${submitAction}
         </div>
       `;
+
 
   return `
     <article ${
@@ -420,15 +513,8 @@ function renderInstanceCard(instance) {
       <div class="field record-detail">
         <div class="detail-stack">
           ${renderProviderSourceRow(item, editable)}
-          ${renderTagSelector({
-            scope: "instance",
-            tags: item.tags,
-            draft: item.tag_draft,
-            editable: tagEditable,
-            instanceId,
-            open: Boolean(item.tag_selector_open),
-          })}
-          ${pending ? "" : inlineActions}
+          ${renderInstanceModelSelector(item, pending)}
+          ${inlineActions}
         </div>
       </div>
       <div class="record-actions instance-actions">
