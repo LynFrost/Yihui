@@ -212,6 +212,45 @@ def test_deleted_model_is_not_resurrected_by_an_in_flight_success(tmp_path):
     )
 
 
+
+def test_settings_save_cannot_forge_verification_or_copy_it_to_new_provider(tmp_path):
+    client = make_client(tmp_path)
+    settings = client.get("/api/settings").get_json()["settings"]
+    provider_key = settings["active_provider"]
+    verified_model = "v074-settings-verified-model"
+    forged_model = "v074-forged-verified-model"
+    new_provider_key = "v074_cloned_provider"
+
+    assert client.post(
+        "/api/provider-models",
+        json={"action": "add", "provider_key": provider_key, "model": verified_model},
+    ).status_code == 200
+    with client.application.app_context():
+        api_module.record_successful_provider_model(provider_key, verified_model)
+
+    settings = client.get("/api/settings").get_json()["settings"]
+    provider = settings["providers"][provider_key]
+    for candidate in provider["model_candidates"]:
+        if candidate["id"] == verified_model:
+            candidate["verified"] = False
+    provider["model_candidates"].append({"id": forged_model, "verified": True})
+    settings["providers"][new_provider_key] = {
+        **provider,
+        "display_name": "V0.74 Cloned Provider",
+    }
+
+    saved = client.put("/api/settings", json=settings)
+    assert saved.status_code == 200
+    providers = saved.get_json()["settings"]["providers"]
+    assert {"id": verified_model, "verified": True} in providers[provider_key]["model_candidates"]
+    assert all(item["id"] != forged_model for item in providers[provider_key]["model_candidates"])
+    assert all(item["id"] != verified_model for item in providers[new_provider_key]["model_candidates"])
+    assert {"id": providers[new_provider_key]["model"], "verified": False} in (
+        providers[new_provider_key]["model_candidates"]
+    )
+
+
+
 def test_frontend_model_selector_and_compact_tag_row_are_wired():
     render_instance = (ROOT / "frontend" / "js" / "render-instance.js").read_text(encoding="utf-8")
     actions_manager = (ROOT / "frontend" / "js" / "actions-manager.js").read_text(encoding="utf-8")
