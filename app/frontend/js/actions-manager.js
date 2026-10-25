@@ -1273,6 +1273,7 @@ function toggleInstanceModelDropdown(instanceId, providerKey) {
     return;
   }
   const key = instanceModelDropdownKey(instanceId, providerKey);
+  closeTagSelectors();
   state.instanceModelDropdownOpenKey = state.instanceModelDropdownOpenKey === key ? "" : key;
   renderManagerIfActive();
 }
