@@ -375,14 +375,22 @@ function renderInstanceTagPopover(item, editable) {
         : ""}
     </span>
   `).join("");
+  const clearAction = editable && tags.length
+    ? `<button type="button" class="instance-clear-tags-chip instance-tag-popover-clear" data-action="clear-instance-tags" data-id="${instanceId}" title="清除全部标签" aria-label="清除全部标签">清空</button>`
+    : "";
 
   return `
     <div class="instance-tag-popover" data-instance-tag-popover="true" role="group" aria-label="完整标签">
-      ${chips || `<span class="instance-tag-popover-empty">暂无标签</span>`}
+      <div class="instance-tag-popover-header">
+        <span class="instance-tag-popover-title">完整标签</span>
+        ${clearAction}
+      </div>
+      <div class="instance-tag-popover-chips">
+        ${chips || `<span class="instance-tag-popover-empty">暂无标签</span>`}
+      </div>
     </div>
   `;
 }
-
 function renderInstanceCard(instance) {
   const pending = isRunningInstance(instance);
   const draft = pending ? null : editingDraft(instance);
@@ -449,9 +457,6 @@ function renderInstanceCard(instance) {
   const submitAction = prepared
     ? `<button type="button" class="submit-instance-button" data-action="submit-manual-instance" data-id="${escapeHtml(instanceId)}">提交</button>`
     : `<button type="button" class="submit-instance-button" disabled title="已有输出图">提交</button>`;
-  const clearTagsAction = Array.isArray(item.tags) && item.tags.length
-    ? `<button type="button" class="instance-clear-tags-chip" data-action="clear-instance-tags" data-id="${escapeHtml(instanceId)}" title="清除标签">X</button>`
-    : "";
   const tagSelector = renderTagSelector({
     scope: "instance",
     tags: item.tags,
@@ -475,7 +480,7 @@ function renderInstanceCard(instance) {
       ? `
         <div class="instance-inline-actions">
           ${tagSelector}
-          ${clearTagsAction}
+          
           <button type="button" data-action="bring-instance-to-operation" data-id="${escapeHtml(instanceId)}">带入</button>
           ${copyAction}
           <button type="button" class="submit-instance-button" data-action="retry-failed-instance" data-id="${escapeHtml(instanceId)}">重提</button>
@@ -484,7 +489,7 @@ function renderInstanceCard(instance) {
       : `
         <div class="instance-inline-actions">
           ${tagSelector}
-          ${clearTagsAction}
+          
           <button type="button" data-action="bring-instance-to-operation" data-id="${escapeHtml(instanceId)}">带入</button>
           ${copyAction}
           ${submitAction}

@@ -131,66 +131,61 @@ function positionInstanceTagPopover(anchor) {
   const anchorRect = anchor.getBoundingClientRect();
   const viewportPadding = 12;
   const gap = 8;
-  const maxWidth = Math.max(120, Math.min(360, window.innerWidth - viewportPadding * 2));
-  const maxHeight = Math.max(80, Math.min(360, window.innerHeight - viewportPadding * 2));
-  const leftSpace = anchorRect.left - viewportPadding - gap;
-  const rightSpace = window.innerWidth - anchorRect.right - viewportPadding - gap;
+  const viewportWidth = Math.max(1, window.innerWidth - viewportPadding * 2);
+  const viewportHeight = Math.max(1, window.innerHeight - viewportPadding * 2);
+  const leftSpace = Math.max(0, anchorRect.left - viewportPadding - gap);
+  const rightSpace = Math.max(0, window.innerWidth - anchorRect.right - viewportPadding - gap);
+
+  // Prefer the left side. If it cannot provide a useful width, use the right side
+  // rather than moving the popup below the tag box in pinned mode.
+  let side = "left";
+  let availableSpace = leftSpace;
+  if (leftSpace < 120 && rightSpace > leftSpace) {
+    side = "right";
+    availableSpace = rightSpace;
+  }
+  if (availableSpace <= 0 && rightSpace > 0) {
+    side = "right";
+    availableSpace = rightSpace;
+  }
+  if (availableSpace <= 0) {
+    availableSpace = viewportWidth;
+  }
+
+  const maxWidth = Math.max(1, Math.min(360, viewportWidth, availableSpace));
+  const maxHeight = Math.max(1, Math.min(360, viewportHeight));
   const previousDisplay = popover.style.display;
   const previousVisibility = popover.style.visibility;
 
   popover.style.maxWidth = `${maxWidth}px`;
+  popover.style.minWidth = `${Math.min(180, maxWidth)}px`;
   popover.style.maxHeight = `${maxHeight}px`;
   popover.style.visibility = "hidden";
   popover.style.display = "flex";
 
-  let popoverRect = popover.getBoundingClientRect();
-  let popoverWidth = popoverRect.width || maxWidth;
-  let popoverHeight = popoverRect.height || Math.min(120, maxHeight);
-
-  if (leftSpace < popoverWidth && rightSpace < popoverWidth) {
-    const aboveSpace = anchorRect.top - viewportPadding - gap;
-    const belowSpace = window.innerHeight - anchorRect.bottom - viewportPadding - gap;
-    const verticalRoom = Math.max(80, Math.max(aboveSpace, belowSpace));
-    popover.style.maxHeight = `${Math.min(maxHeight, verticalRoom)}px`;
-    popoverRect = popover.getBoundingClientRect();
-    popoverWidth = popoverRect.width || maxWidth;
-    popoverHeight = popoverRect.height || Math.min(120, maxHeight);
-  }
+  const popoverRect = popover.getBoundingClientRect();
+  const popoverWidth = Math.min(popoverRect.width || maxWidth, maxWidth);
+  const popoverHeight = Math.min(popoverRect.height || Math.min(120, maxHeight), maxHeight);
 
   popover.style.display = previousDisplay;
   popover.style.visibility = previousVisibility;
   popover.style.position = "fixed";
   popover.style.right = "auto";
 
-  let left;
-  let top;
-  if (leftSpace >= popoverWidth) {
-    left = anchorRect.left - popoverWidth - gap;
-    top = anchorRect.top + anchorRect.height / 2 - popoverHeight / 2;
-  } else if (rightSpace >= popoverWidth) {
-    left = anchorRect.right + gap;
-    top = anchorRect.top + anchorRect.height / 2 - popoverHeight / 2;
-  } else {
-    left = Math.max(
-      viewportPadding,
-      Math.min(anchorRect.left, window.innerWidth - popoverWidth - viewportPadding),
-    );
-    const aboveSpace = anchorRect.top - viewportPadding - gap;
-    const belowSpace = window.innerHeight - anchorRect.bottom - viewportPadding - gap;
-    top = aboveSpace >= popoverHeight || aboveSpace >= belowSpace
-      ? anchorRect.top - popoverHeight - gap
-      : anchorRect.bottom + gap;
-  }
+  let left = side === "left"
+    ? anchorRect.left - popoverWidth - gap
+    : anchorRect.right + gap;
+  const maxLeft = Math.max(viewportPadding, window.innerWidth - popoverWidth - viewportPadding);
+  left = Math.max(viewportPadding, Math.min(left, maxLeft));
 
-  top = Math.max(
-    viewportPadding,
-    Math.min(top, window.innerHeight - popoverHeight - viewportPadding),
-  );
+  let top = anchorRect.top + anchorRect.height / 2 - popoverHeight / 2;
+  const maxTop = Math.max(viewportPadding, window.innerHeight - popoverHeight - viewportPadding);
+  top = Math.max(viewportPadding, Math.min(top, maxTop));
+
   popover.style.left = `${Math.round(left)}px`;
   popover.style.top = `${Math.round(top)}px`;
   popover.style.transform = "none";
 }
-
 function setInstanceTagPopoverPinned(instanceId, pinned) {
   const id = String(instanceId || "");
   state.instanceTagPopover = {
@@ -228,21 +223,15 @@ function closeInstanceTagPopoverForOutsidePointerDown(event) {
   }
 
   const pinnedId = String(state.instanceTagPopover.instanceId || "");
-  const popover = event.target?.closest?.("[data-instance-tag-popover]");
-  const popoverAnchor = popover?.closest?.("[data-instance-tag-popover-anchor]");
-  const tagBox = event.target?.closest?.(".tag-selector-input-wrap");
-  const tagBoxAnchor = tagBox?.closest?.("[data-instance-tag-popover-anchor]");
-  const insidePinnedPopover = popoverAnchor
-    && String(popoverAnchor.dataset.id || "") === pinnedId;
-  const insidePinnedTagBox = tagBoxAnchor
-    && String(tagBoxAnchor.dataset.id || "") === pinnedId;
+  const tagPopoverAnchor = event.target?.closest?.("[data-instance-tag-popover-anchor]");
+  const insidePinnedAnchor = tagPopoverAnchor
+    && String(tagPopoverAnchor.dataset.id || "") === pinnedId;
 
-  if (insidePinnedPopover || insidePinnedTagBox) {
+  if (insidePinnedAnchor) {
     return;
   }
   setInstanceTagPopoverPinned("", false);
 }
-
 globalThis.positionActiveInstanceTagPopover = positionActiveInstanceTagPopover;
 
 app.addEventListener("click", async (event) => {
@@ -261,7 +250,11 @@ app.addEventListener("click", async (event) => {
   const action = actionNode?.dataset.action;
   const tagPopoverAnchor = event.target.closest("[data-instance-tag-popover-anchor]");
   const tagPopover = event.target.closest("[data-instance-tag-popover]");
-  if (action === "remove-instance-tag" && tagPopover && tagPopoverAnchor) {
+  if (
+    (action === "remove-instance-tag" || action === "clear-instance-tags")
+    && tagPopover
+    && tagPopoverAnchor
+  ) {
     setInstanceTagPopoverPinned(tagPopoverAnchor.dataset.id, true);
   } else if (
     tagPopoverAnchor
@@ -271,7 +264,9 @@ app.addEventListener("click", async (event) => {
     const instanceId = String(tagPopoverAnchor.dataset.id || "");
     const alreadyPinned = Boolean(state.instanceTagPopover?.pinned)
       && String(state.instanceTagPopover.instanceId || "") === instanceId;
-    setInstanceTagPopoverPinned(instanceId, !alreadyPinned);
+    if (!alreadyPinned) {
+      setInstanceTagPopoverPinned(instanceId, true);
+    }
   }
   const closedDropdowns = closeFloatingDropdownsForClick(event.target);
   if (actionNode) {

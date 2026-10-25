@@ -747,19 +747,19 @@ button.operation-provider-marker {
 }
 
 .instance-clear-tags-chip {
-  width: 24px;
-  min-width: 24px;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
   height: 24px;
-  min-height: 26px;
-  padding: 0;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.instance-inline-actions .instance-clear-tags-chip {
-  width: 24px;
-  min-width: 24px;
+.instance-tag-popover-clear {
+  margin-left: auto;
 }
 
 .tag-selector-clear {
@@ -867,10 +867,11 @@ button.operation-provider-marker {
   right: calc(100% + 8px);
   z-index: 220;
   display: none;
-  flex-wrap: wrap;
+  flex-direction: column;
+  flex-wrap: nowrap;
   align-content: flex-start;
-  align-items: center;
-  gap: 6px;
+  align-items: stretch;
+  gap: 8px;
   width: max-content;
   min-width: min(180px, calc(100vw - 24px));
   max-width: min(360px, calc(100vw - 24px));
@@ -890,6 +891,33 @@ button.operation-provider-marker {
   display: flex;
 }
 
+.instance-tag-popover-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.instance-tag-popover-title {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.instance-tag-popover-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
 .instance-tag-popover .tag-chip {
   flex: 0 1 auto;
   max-width: 100%;

@@ -4540,6 +4540,10 @@ def test_v051_instance_card_moves_clear_tags_next_to_bring_in():
         render_instance_js.find("function renderInstanceCard") :
         render_instance_js.find("function renderInstanceTagEditor")
     ]
+    popover_renderer = render_instance_js[
+        render_instance_js.find("function renderInstanceTagPopover") :
+        render_instance_js.find("function renderInstanceCard")
+    ]
     inline_actions = instance_card[
         instance_card.find("const inlineActions") :
         instance_card.find("return `", instance_card.find("const inlineActions"))
@@ -4547,11 +4551,13 @@ def test_v051_instance_card_moves_clear_tags_next_to_bring_in():
 
     assert 'data-action="clear-tag-selector"\n        data-scope="${escapeHtml(scope)}"' in tag_selector
     assert 'scope !== "instance"' in tag_selector
-    assert 'data-action="clear-instance-tags"' in instance_card
-    assert 'title="清除标签"' in instance_card
-    assert ">X</button>" in instance_card
-    assert inline_actions.find("${clearTagsAction}") < inline_actions.find('data-action="bring-instance-to-operation"')
+    assert 'data-action="clear-instance-tags"' in popover_renderer
+    assert 'title="清除全部标签"' in popover_renderer
+    assert ">清空</button>" in popover_renderer
+    assert 'data-action="clear-instance-tags"' not in inline_actions
+    assert "${clearTagsAction}" not in inline_actions
     assert ".instance-clear-tags-chip" in css
+    assert ".instance-tag-popover-clear" in css
 
 
 def test_v051_provider_dropdowns_use_unified_sorted_entries():
@@ -4701,8 +4707,9 @@ def test_v065_instance_clear_tags_badges_and_pending_color_are_compact():
     css = read_frontend("styles.css")
 
     assert "清标签" not in render_instance_js
-    assert 'title="清除标签"' in render_instance_js
-    assert ">X</button>" in render_instance_js
+    assert 'title="清除全部标签"' in render_instance_js
+    assert ">清空</button>" in render_instance_js
+    assert 'data-action="remove-instance-tag"' in render_instance_js
     assert "function instanceStatusClass" in render_instance_js
     assert 'source-badge ${escapeHtml(instanceStatusClass(item))}' in render_instance_js
     assert ".source-badge.is-prepared" in css
@@ -4712,10 +4719,11 @@ def test_v065_instance_clear_tags_badges_and_pending_color_are_compact():
     assert "background:" in pending_css
     assert "#fff3e6" in pending_css or "#ffedd5" in pending_css
     clear_css = css[css.find(".instance-clear-tags-chip") : css.find(".tag-selector-clear")]
-    assert "width: 24px;" in clear_css
-    assert "min-width: 24px;" in clear_css
-    assert "border-radius: 999px;" in clear_css
-    assert ".instance-inline-actions .instance-clear-tags-chip" in clear_css
+    assert "width: auto;" in clear_css
+    assert "min-width: 0;" in clear_css
+    assert "border-radius: 5px;" in clear_css
+    assert ".instance-tag-popover-clear" in clear_css
+    assert ".instance-inline-actions .instance-clear-tags-chip" not in css
 
 
 def test_v065_history_status_labels_are_generation_semantics():
@@ -5456,3 +5464,44 @@ def test_v0741_instance_tag_popover_and_card_action_alignment():
     assert '.instance-tag-popover-anchor:hover .instance-tag-popover' in css
     assert '.instance-card .instance-actions {' in css
     assert 'flex: 1 1 auto;' in css[css.find(".instance-card .instance-action-slot-spacer") :]
+
+
+def test_v0742_instance_tag_popover_position_and_clear_action():
+    render_instance_js = (ROOT / "frontend" / "js" / "render-instance.js").read_text(encoding="utf-8")
+    events_js = (ROOT / "frontend" / "js" / "events.js").read_text(encoding="utf-8")
+    css = read_frontend("styles.css")
+
+    popover_renderer = render_instance_js[
+        render_instance_js.find("function renderInstanceTagPopover") :
+        render_instance_js.find("function renderInstanceCard")
+    ]
+    instance_card = render_instance_js[
+        render_instance_js.find("function renderInstanceCard") :
+        render_instance_js.find("function renderInstanceTagEditor")
+    ]
+    positioner = events_js[
+        events_js.find("function positionInstanceTagPopover(anchor)") :
+        events_js.find("function setInstanceTagPopoverPinned")
+    ]
+    outside_handler = events_js[
+        events_js.find("function closeInstanceTagPopoverForOutsidePointerDown(event)") :
+        events_js.find("globalThis.positionActiveInstanceTagPopover")
+    ]
+
+    assert "const leftSpace = Math.max(0," in positioner
+    assert "const rightSpace = Math.max(0," in positioner
+    assert 'side === "left"' in positioner
+    assert "const aboveSpace" not in positioner
+    assert "belowSpace" not in positioner
+    assert 'popover.style.position = "fixed";' in positioner
+    assert 'String(tagPopoverAnchor.dataset.id || "") === pinnedId' in outside_handler
+    assert "if (!alreadyPinned) {" in events_js
+    assert "setInstanceTagPopoverPinned(instanceId, !alreadyPinned)" not in events_js
+    assert '(action === "remove-instance-tag" || action === "clear-instance-tags")' in events_js
+    assert 'class="instance-tag-popover-header"' in popover_renderer
+    assert 'class="instance-tag-popover-chips"' in popover_renderer
+    assert 'data-action="clear-instance-tags"' in popover_renderer
+    assert 'data-action="clear-instance-tags"' not in instance_card
+    assert ".instance-tag-popover-header {" in css
+    assert ".instance-tag-popover-chips {" in css
+    assert ".instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover" in css
