@@ -163,7 +163,7 @@ def test_export_json_endpoint_includes_database_and_settings_without_images(tmp_
     assert resp.status_code == 200
     export_path = Path(resp.get_json()["path"])
     payload = json.loads(export_path.read_text(encoding="utf-8"))
-    assert payload["app_version"] == "V0.73"
+    assert payload["app_version"] == "V0.74"
     assert payload["image_files_included"] is False
     assert payload["settings"]["active_provider"] == "aiapis_gpt_image_2"
     assert payload["database"]["instances"][0]["prompt"] == "导出测试"
@@ -303,7 +303,7 @@ def test_v037_export_task_writes_zip_jsonl_package_with_manifest_and_snapshots(t
     assert result["status"] == "success"
     assert result["message"] == "导出完成"
     export_path = Path(result["path"])
-    assert export_path.name.startswith("AIImageManager_export_V0.73_")
+    assert export_path.name.startswith("AIImageManager_export_V0.74_")
     assert export_path.suffix == ".zip"
     assert result["summary"]["instance_count"] == 1
     assert result["summary"]["input_image_count"] == 1
