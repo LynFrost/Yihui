@@ -739,7 +739,12 @@ function renderOperationArea() {
 
       <div class="field record-detail">
         <div class="detail-stack">
-          ${renderOperationProviderSelect()}
+          <div class="operation-provider-model-row">
+            ${renderOperationProviderSelect()}
+            <div class="operation-model-selector-wrap">
+              ${globalThis.renderInstanceModelSelector({ id: "__operation__", provider: activeProviderName() }, false)}
+            </div>
+          </div>
           ${renderTagSelector({
             scope: "operation",
             tags: state.operation.tags,

@@ -194,9 +194,14 @@
 }
 
 .instance-card .detail-stack {
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto minmax(0, 1fr);
   height: 100%;
   padding-left: 4px;
+}
+
+.instance-card .instance-inline-actions {
+  align-self: end;
+  width: 100%;
 }
 
 .operation-area .detail-stack {
@@ -209,8 +214,64 @@
   min-height: var(--operation-control-stack-height);
 }
 
-.operation-area .operation-provider-select {
+.operation-area .operation-provider-model-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   grid-row: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.operation-area .operation-provider-select {
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 4px;
+}
+
+.operation-area .operation-provider-combobox {
+  flex: 1 1 0;
+}
+
+.operation-area .operation-provider-trigger {
+  grid-template-columns: minmax(0, 1fr) 18px 10px;
+  gap: 3px;
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.operation-model-selector-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.operation-model-selector-wrap .instance-model-selector {
+  width: 100%;
+  gap: 4px;
+}
+
+.operation-model-selector-wrap .instance-model-label {
+  flex: 0 0 30px;
+  width: 30px;
+}
+
+.operation-model-selector-wrap .instance-model-combobox {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.operation-model-selector-wrap .instance-model-trigger {
+  gap: 3px;
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.operation-model-selector-wrap .instance-model-dropdown {
+  right: 0;
+  left: auto;
+  width: max(100%, 240px);
+  max-width: min(360px, calc(100vw - 24px));
 }
 
 .operation-area .tag-selector {

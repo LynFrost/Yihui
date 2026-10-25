@@ -695,6 +695,7 @@ Object.assign(globalThis, {
   isPreparedInstance,
   renderImageFieldHeader,
   renderProviderSourceRow,
+  renderInstanceModelSelector,
   instanceNumberLabel,
   instanceGenerationCount,
   canEditInstanceCount,

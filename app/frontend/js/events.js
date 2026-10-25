@@ -461,11 +461,13 @@ app.addEventListener("click", async (event) => {
     setSaveLayout(actionNode.dataset.layout);
   }
   if (action === "toggle-operation-provider-dropdown") {
+    state.instanceModelDropdownOpenKey = "";
     state.operation.provider_dropdown_open = !state.operation.provider_dropdown_open;
     renderManager();
   }
   if (action === "select-operation-provider") {
     event.stopPropagation();
+    state.instanceModelDropdownOpenKey = "";
     const providerKey = actionNode.dataset.providerKey || "";
     const providerChanged = providerKey && providerKey !== activeProviderName();
     closeOperationProviderDropdown({ render: !providerChanged });
@@ -1552,6 +1554,7 @@ document.addEventListener("keydown", (event) => {
     || state.operation.size_picker_open
     || state.operation.resolution_picker_open
     || state.operation.provider_dropdown_open
+    || state.instanceModelDropdownOpenKey
     || state.filters.tag_dropdown_open
     || state.history.history_tag_dropdown_open
     || state.generationPathDropdownOpen
@@ -1564,6 +1567,7 @@ document.addEventListener("keydown", (event) => {
     state.operation.size_picker_open = false;
     state.operation.resolution_picker_open = false;
     state.operation.provider_dropdown_open = false;
+    state.instanceModelDropdownOpenKey = "";
     state.filters.tag_dropdown_open = false;
     state.history.history_tag_dropdown_open = false;
     state.generationPathDropdownOpen = false;

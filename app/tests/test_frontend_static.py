@@ -5520,3 +5520,73 @@ def test_v0742_instance_tag_popover_position_and_clear_action():
     assert ".instance-tag-popover-header {" in css
     assert ".instance-tag-popover-chips {" in css
     assert ".instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover" in css
+
+
+def test_v0743_operation_model_selector_and_card_action_alignment():
+    render_operation_js = (ROOT / "frontend" / "js" / "render-operation.js").read_text(encoding="utf-8")
+    render_instance_js = (ROOT / "frontend" / "js" / "render-instance.js").read_text(encoding="utf-8")
+    events_js = (ROOT / "frontend" / "js" / "events.js").read_text(encoding="utf-8")
+    actions_manager_js = (ROOT / "frontend" / "js" / "actions-manager.js").read_text(encoding="utf-8")
+    css = (ROOT / "frontend" / "css" / "06-instance-card.css").read_text(encoding="utf-8")
+
+    operation_area = render_operation_js[
+        render_operation_js.find("function renderOperationArea") :
+        render_operation_js.find("Object.assign(globalThis")
+    ]
+    model_renderer = render_instance_js[
+        render_instance_js.find("function renderInstanceModelSelector") :
+        render_instance_js.find("function instanceNumberLabel")
+    ]
+    provider_dropdown_css = css[
+        css.find(".operation-provider-dropdown {") :
+        css.find(".operation-provider-option {")
+    ]
+    card_detail_css = css[
+        css.find(".instance-card .detail-stack {") :
+        css.find(".operation-area .detail-stack {")
+    ]
+    card_actions_css = css[
+        css.find(".instance-card .instance-inline-actions {") :
+        css.find(".instance-inline-actions > .tag-selector {")
+    ]
+    click_handler = events_js[
+        events_js.find('if (action === "toggle-operation-provider-dropdown")') :
+        events_js.find('if (action === "toggle-operation-provider-marker")')
+    ]
+    model_toggle = actions_manager_js[
+        actions_manager_js.find("function toggleInstanceModelDropdown") :
+        actions_manager_js.find("async function addProviderModelCandidate")
+    ]
+    escape_handler = events_js[
+        events_js.find('if (event.key === "Escape" && (') :
+        events_js.find('if ((event.key === "Enter"')
+    ]
+
+    assert '<div class="operation-provider-model-row">' in operation_area
+    assert 'class="operation-model-selector-wrap"' in operation_area
+    assert 'globalThis.renderInstanceModelSelector({ id: "__operation__", provider: activeProviderName() }, false)' in operation_area
+    assert "renderInstanceModelSelector," in render_instance_js[render_instance_js.rfind("Object.assign(globalThis"):]
+    assert 'data-action="select-provider-model-candidate"' in model_renderer
+    assert 'data-action="delete-provider-model-candidate"' in model_renderer
+    assert 'data-action="add-provider-model-candidate"' in model_renderer
+    assert 'data-provider-key="${escapeHtml(providerKey)}"' in model_renderer
+    assert 'width: max(100%, 280px);' in provider_dropdown_css
+    assert ".operation-provider-model-row" in css
+    assert ".operation-model-selector-wrap .instance-model-dropdown" in css
+    assert 'state.instanceModelDropdownOpenKey = "";' in click_handler
+    assert "state.operation.provider_dropdown_open = false;" in model_toggle
+    assert "|| state.instanceModelDropdownOpenKey" in escape_handler
+    assert 'state.instanceModelDropdownOpenKey = "";' in escape_handler
+
+    assert "grid-template-rows: auto auto minmax(0, 1fr);" in card_detail_css
+    assert "align-self: end;" in card_actions_css
+    assert "width: 100%;" in card_actions_css
+    assert ".instance-card .instance-actions {" in css
+    assert "justify-content: space-between;" in css[
+        css.find(".instance-card .instance-actions {") :
+        css.find(".instance-card .instance-action-slot-spacer {")
+    ]
+    assert "flex: 1 1 auto;" in css[
+        css.find(".instance-card .instance-action-slot-spacer {") :
+        css.find(".instance-card.is-pending {")
+    ]
