@@ -447,11 +447,14 @@ function renderTagSelector({
   const popoverAttrs = popoverHtml
     ? ` data-instance-tag-popover-anchor="true" data-id="${escapeHtml(instanceId)}"`
     : "";
+  const renderedChips = scope === "instance"
+    ? `<div class="instance-tag-selector-chips">${chips}</div>`
+    : chips;
 
   return `
     <div class="tag-selector ${open ? "is-open" : ""} ${editable ? "" : "is-readonly"}${popoverClass}"${popoverAttrs}>
       <div class="tag-selector-input-wrap">
-        ${chips}
+        ${renderedChips}
         ${readonlyPlaceholder}
         ${
           editable

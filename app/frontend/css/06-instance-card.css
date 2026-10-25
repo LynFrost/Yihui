@@ -189,8 +189,13 @@
   gap: 5px;
 }
 
+.instance-card .record-detail {
+  align-self: stretch;
+}
+
 .instance-card .detail-stack {
   grid-template-rows: auto auto 1fr;
+  height: 100%;
   padding-left: 4px;
 }
 
@@ -228,6 +233,17 @@
 .instance-inline-actions > .tag-selector {
   flex: 1 1 90px;
   min-width: 0;
+}
+
+.instance-inline-actions .instance-tag-selector-chips {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .instance-inline-actions .tag-selector-input-wrap {

@@ -5435,6 +5435,9 @@ def test_v0741_instance_tag_popover_and_card_action_alignment():
     assert 'popoverHtml: renderInstanceTagPopover(item, tagEditable)' in render_instance_js
     assert 'data-action="remove-instance-tag"' in popover_renderer
     assert 'data-instance-tag-popover="true"' in popover_renderer
+    assert 'action === "remove-instance-tag"' in events_js
+    assert 'const renderedChips = scope === "instance"' in selector_renderer
+    assert 'class="instance-tag-selector-chips"' in selector_renderer
     assert 'popoverHtml = ""' in selector_renderer
     assert 'data-instance-tag-popover-anchor="true"' in selector_renderer
     assert 'function positionInstanceTagPopover(anchor)' in events_js
@@ -5445,6 +5448,11 @@ def test_v0741_instance_tag_popover_and_card_action_alignment():
     assert 'height: 34px;' in tag_box_css
     assert 'overflow: hidden;' in tag_box_css
     assert 'overflow-x: auto;' not in tag_box_css
+    assert '.instance-inline-actions .instance-tag-selector-chips {' in css
+    assert 'overflow: hidden;' in css[css.find(".instance-inline-actions .instance-tag-selector-chips {"):]
+    assert '.instance-card .record-detail {' in css
+    assert 'align-self: stretch;' in css[css.find(".instance-card .record-detail {"):]
+    assert 'height: 100%;' in css[css.find(".instance-card .detail-stack {"):]
     assert '.instance-tag-popover-anchor:hover .instance-tag-popover' in css
     assert '.instance-card .instance-actions {' in css
     assert 'flex: 1 1 auto;' in css[css.find(".instance-card .instance-action-slot-spacer") :]
