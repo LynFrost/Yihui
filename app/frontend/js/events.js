@@ -78,6 +78,11 @@ function closeFloatingDropdownsForClick(target) {
     document.querySelector(".setting-history-dropdown")?.remove();
     closedSettingsDropdown = true;
   }
+  if (!target.closest?.(".instance-model-selector") && state.instanceModelDropdownOpenKey) {
+    state.instanceModelDropdownOpenKey = "";
+    document.querySelectorAll(".instance-model-dropdown").forEach((dropdown) => dropdown.remove());
+    closedManagerDropdown = true;
+  }
   return {
     manager: closedManagerDropdown,
     settings: closedSettingsDropdown,
@@ -636,6 +641,39 @@ app.addEventListener("click", async (event) => {
   }
   if (action === "restore-selected-backup") {
     restoreSelectedBackup();
+  }
+
+  if (action === "toggle-instance-model-dropdown") {
+    toggleInstanceModelDropdown(actionNode.dataset.id, actionNode.dataset.providerKey || "");
+  }
+  if (action === "add-provider-model-candidate") {
+    addProviderModelCandidate(actionNode.dataset.id, actionNode.dataset.providerKey || "").catch((error) => {
+      if (state.page === "manager") {
+        setMessage(error.message, "error");
+      }
+    });
+  }
+  if (action === "select-provider-model-candidate") {
+    selectProviderModelCandidate(
+      actionNode.dataset.id,
+      actionNode.dataset.providerKey || "",
+      actionNode.dataset.modelId || "",
+    ).catch((error) => {
+      if (state.page === "manager") {
+        setMessage(error.message, "error");
+      }
+    });
+  }
+  if (action === "delete-provider-model-candidate") {
+    deleteProviderModelCandidate(
+      actionNode.dataset.id,
+      actionNode.dataset.providerKey || "",
+      actionNode.dataset.modelId || "",
+    ).catch((error) => {
+      if (state.page === "manager") {
+        setMessage(error.message, "error");
+      }
+    });
   }
   if (action === "edit-instance") {
     startEditingInstance(actionNode.dataset.id);
