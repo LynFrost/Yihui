@@ -2092,6 +2092,24 @@ def api_update_settings():
             submitted["generation_path_history"] = existing_config.get("generation_path_history", [])
         if "provider_field_history" not in submitted:
             submitted["provider_field_history"] = existing_config.get("provider_field_history", {})
+
+        # Model candidates are managed only by /provider-models and successful generation.
+        # Settings saves must preserve trusted status for existing Providers and must not
+        # import candidates (or verified flags) from a client-supplied payload.
+        submitted_providers = submitted.get("providers")
+        existing_providers = existing_config.get("providers") or {}
+        if isinstance(submitted_providers, dict):
+            for provider_key, provider in submitted_providers.items():
+                if not isinstance(provider, dict):
+                    continue
+                previous = existing_providers.get(str(provider_key), {})
+                if isinstance(previous, dict):
+                    provider["model_candidates"] = deepcopy(
+                        previous.get("model_candidates", [])
+                    )
+                else:
+                    provider["model_candidates"] = []
+
         config = normalize_config(submitted)
         config = strip_provider_default_sizes(config)
         save_config(current_app.config["CONFIG_FILE"], config)
