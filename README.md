@@ -2,7 +2,7 @@
 
 **意绘** 是一个面向本地工作流的 AI 图像生成与管理工具。它将多 Provider 生图、历史记录、素材管理、节点与标签整理、备份恢复等能力集中在一个本地 Web 界面中。
 
-当前版本：**V0.73**
+当前版本：**V0.74**
 
 ## 核心功能
 
@@ -79,7 +79,7 @@ Windows 下可以直接双击：
     ├─ files/                # 生图调用脚本
     ├─ config/
     │  └─ AIImageManager.config.example.json
-    ├─ VERSION_V0.73.txt     # 当前版本标记
+    ├─ VERSION_V0.74.txt     # 当前版本标记
     ├─ README.md
     ├─ LICENSE
     └─ .gitignore
@@ -142,7 +142,7 @@ Windows 下可以直接双击：
 
 当前版本：
 
-    V0.73
+    V0.74
 
 程序版本由 app/VERSION、后端版本常量、前端静态资源版本和根目录版本标记共同保持一致。
 
