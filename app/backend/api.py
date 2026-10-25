@@ -319,6 +319,36 @@ def record_successful_provider_field_history(provider_config: dict) -> None:
     save_provider_field_history(next_history)
 
 
+
+def record_successful_provider_model(provider_key: str, model: str) -> None:
+    clean_key = str(provider_key or "").strip()
+    clean_model = str(model or "").strip()
+    if not clean_key or not clean_model:
+        return
+    with DATA_LOCK:
+        config = normalize_config(load_current_config())
+        providers = config.get("providers") or {}
+        provider = providers.get(clean_key) if isinstance(providers, dict) else None
+        if not isinstance(provider, dict):
+            return
+        candidates = provider.get("model_candidates", [])
+        candidates = [dict(item) for item in candidates if isinstance(item, dict)]
+        matched = False
+        for candidate in candidates:
+            if str(candidate.get("id") or "").strip() == clean_model:
+                candidate["verified"] = True
+                matched = True
+                break
+        if not matched:
+            if len(candidates) >= 100:
+                candidates = candidates[:99]
+            candidates.append({"id": clean_model, "verified": True})
+        provider["model_candidates"] = candidates
+        config = normalize_config(config)
+        save_config(current_app.config["CONFIG_FILE"], config)
+        current_app.config["APP_CONFIG"] = config
+
+
 def merge_path_history(*sources, limit: int = 20) -> list[str]:
     merged: list[str] = []
     for source in sources:
@@ -2071,6 +2101,69 @@ def api_update_settings():
         return jsonify({"error": str(exc)}), 400
 
 
+
+@api.post("/provider-models")
+def api_update_provider_models():
+    try:
+        data = payload_json()
+        provider_key = str(data.get("provider_key") or "").strip()
+        action = str(data.get("action") or "").strip().lower()
+        model = str(data.get("model") or "").strip()
+        if not provider_key:
+            return jsonify({"error": "Provider 不能为空"}), 400
+        if action not in {"add", "select", "delete"}:
+            return jsonify({"error": "不支持的模型操作"}), 400
+        if not model:
+            return jsonify({"error": "模型 ID 不能为空"}), 400
+        if len(model) > 200:
+            return jsonify({"error": "模型 ID 长度不能超过 200 个字符"}), 400
+        with DATA_LOCK:
+            config = normalize_config(load_current_config())
+            providers = config.get("providers") or {}
+            provider = providers.get(provider_key) if isinstance(providers, dict) else None
+            if not isinstance(provider, dict):
+                return jsonify({"error": f"Provider 不存在：{provider_key}"}), 404
+            candidates = provider.get("model_candidates", [])
+            candidates = [dict(item) for item in candidates if isinstance(item, dict)]
+            existing = next(
+                (candidate for candidate in candidates
+                 if str(candidate.get("id") or "").strip() == model),
+                None,
+            )
+            changed = True
+            if action == "add":
+                if existing:
+                    changed = False
+                else:
+                    if len(candidates) >= 100:
+                        return jsonify({"error": "单个 Provider 最多保存 100 个模型候选"}), 400
+                    candidates.append({"id": model, "verified": False})
+            elif action == "select":
+                if not existing:
+                    return jsonify({"error": "模型候选不存在，请先添加"}), 404
+                changed = str(provider.get("model") or "").strip() != model
+                provider["model"] = model
+            else:
+                current_model = str(provider.get("model") or "").strip()
+                if current_model == model:
+                    return jsonify({"error": "不能删除当前模型，请先切换到其他模型"}), 409
+                if not existing:
+                    return jsonify({"error": "模型候选不存在"}), 404
+                if len(candidates) == 1 and not current_model:
+                    return jsonify({"error": "至少保留一个模型候选，或先选择当前模型"}), 409
+                candidates = [candidate for candidate in candidates
+                              if str(candidate.get("id") or "").strip() != model]
+            provider["model_candidates"] = candidates
+            config = normalize_config(config)
+            save_config(current_app.config["CONFIG_FILE"], config)
+            current_app.config["APP_CONFIG"] = config
+        return jsonify({"settings": public_config(config), "changed": changed})
+    except JsonObjectError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
 @api.post("/generate")
 def api_generate():
     try:
@@ -2365,6 +2458,7 @@ def api_generate():
         )
         record_successful_generation_path(output_dir)
         record_successful_provider_field_history(provider_config)
+        record_successful_provider_model(provider_key, provider_config.get("model"))
         return jsonify(
             {
                 "item": response_item,
