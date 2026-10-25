@@ -2458,7 +2458,10 @@ def api_generate():
         )
         record_successful_generation_path(output_dir)
         record_successful_provider_field_history(provider_config)
-        record_successful_provider_model(provider_key, provider_config.get("model"))
+        try:
+            record_successful_provider_model(provider_key, provider_config.get("model"))
+        except Exception:
+            current_app.logger.exception("Failed to persist verified provider model")
         return jsonify(
             {
                 "item": response_item,
