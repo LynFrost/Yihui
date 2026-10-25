@@ -38,6 +38,7 @@ tabs.forEach((tab) => {
     state.generationPathDropdownOpen = false;
     state.settingHistoryDropdownOpen = "";
     state.operation.provider_dropdown_open = false;
+    state.instanceModelDropdownOpenKey = "";
     state.page = tab.dataset.page;
     if (state.page !== "manager") {
       state.saveAreaKeyboardFocus = false;
