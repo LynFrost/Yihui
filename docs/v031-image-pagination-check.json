@@ -1,0 +1,314 @@
+{
+  "version": "V0.31",
+  "initial": {
+    "label": "initial",
+    "count": 10,
+    "badCount": 0,
+    "bad": []
+  },
+  "cycles": [
+    {
+      "label": "cycle-1-next-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-next-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-next-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-next-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-next-6",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-prev-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-prev-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-prev-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-prev-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-1-prev-1",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-next-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-next-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-next-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-next-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-next-6",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-prev-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-prev-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-prev-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-prev-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-2-prev-1",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-next-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-next-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-next-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-next-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-next-6",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-prev-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-prev-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-prev-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-prev-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-3-prev-1",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-next-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-next-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-next-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-next-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-next-6",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-prev-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-prev-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-prev-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-prev-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-4-prev-1",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-next-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-next-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-next-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-next-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-next-6",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-prev-5",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-prev-4",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-prev-3",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-prev-2",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    },
+    {
+      "label": "cycle-5-prev-1",
+      "count": 10,
+      "badCount": 0,
+      "bad": []
+    }
+  ],
+  "errors": [],
+  "failures": [],
+  "finalPageText": "总数 60 | 第 1 / 6 页"
+}
