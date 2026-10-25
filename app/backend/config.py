@@ -312,7 +312,7 @@ def normalize_provider_model_candidates(
     source = value if isinstance(value, list) else []
     max_items = max(1, int(limit or 100))
     normalized: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    positions: dict[str, int] = {}
     for item in source:
         if isinstance(item, dict):
             model = str(item.get("id") or item.get("model") or "").strip()
@@ -320,10 +320,14 @@ def normalize_provider_model_candidates(
         else:
             model = str(item or "").strip()
             verified = False
-        if not model or model in seen:
+        if not model:
+            continue
+        if model in positions:
+            if verified:
+                normalized[positions[model]]["verified"] = True
             continue
         normalized.append({"id": model, "verified": verified})
-        seen.add(model)
+        positions[model] = len(normalized) - 1
         if len(normalized) >= max_items:
             break
     current = str(current_model or "").strip()
