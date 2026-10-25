@@ -189,6 +189,11 @@
   gap: 5px;
 }
 
+.instance-card .detail-stack {
+  grid-template-rows: auto auto 1fr;
+  padding-left: 4px;
+}
+
 .operation-area .detail-stack {
   grid-template-rows:
     var(--record-detail-top-row)
@@ -213,13 +218,39 @@
 
 .instance-inline-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
   padding-right: var(--space-8);
 }
 
+.instance-inline-actions > .tag-selector {
+  flex: 1 1 90px;
+  min-width: 0;
+}
+
+.instance-inline-actions .tag-selector-input-wrap {
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-height: 30px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.instance-inline-actions .tag-selector-input-wrap input {
+  flex: 1 0 28px;
+  min-width: 28px;
+}
+
+.instance-inline-actions .tag-chip {
+  flex: 0 0 auto;
+}
+
 .submit-instance-button,
-.instance-inline-actions button {
+.instance-inline-actions > button {
+  flex: 0 0 auto;
   min-width: 44px;
 }
 
@@ -411,6 +442,170 @@ button.operation-provider-marker {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 8px;
+}
+
+.instance-model-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 24px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.instance-model-selector.is-open {
+  z-index: 100;
+}
+
+.instance-model-label {
+  flex: 0 0 34px;
+  width: 34px;
+}
+
+.instance-model-combobox {
+  position: relative;
+  flex: 0 1 170px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.instance-model-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.instance-model-trigger:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+.instance-model-current {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instance-model-arrow {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.instance-model-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 120;
+  width: max(100%, 220px);
+  max-width: min(320px, 72vw);
+  max-height: min(320px, 60vh);
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .16);
+}
+
+.instance-model-option {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  border-radius: 4px;
+}
+
+.instance-model-option.is-selected {
+  background: #eef6ff;
+}
+
+.instance-model-option-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.instance-model-option-main:hover {
+  background: rgba(30, 97, 170, .08);
+}
+
+.instance-model-option-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.instance-model-option-status {
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.instance-model-option-status.is-verified {
+  color: #047857;
+}
+
+.instance-model-option-status.is-pending {
+  color: #a16207;
+}
+
+.instance-model-option-delete {
+  flex: 0 0 24px;
+  width: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  color: var(--danger);
+}
+
+.instance-model-option-delete:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.instance-model-add {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 28px;
+  margin-top: 4px;
+  padding: 4px 6px;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  text-align: left;
+}
+
+.instance-model-empty {
+  padding: 8px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .provider-source-row > span:first-child {
