@@ -72,6 +72,7 @@ function renderManager() {
     </section>
     ${renderLightbox()}
   `;
+  globalThis.positionActiveInstanceTagPopover?.();
   bindSaveAreaEvents();
   scrollGenerationPathInputToEnd();
   syncRunningRefresh();
@@ -373,6 +374,8 @@ function renderTagSelector({
   editable = true,
   instanceId = "",
   open = false,
+  popoverHtml = "",
+  popoverPinned = false,
 }) {
   const selectedTags = Array.isArray(tags) ? tags : [];
   const selectedSet = new Set(selectedTags);
@@ -438,9 +441,15 @@ function renderTagSelector({
       >×</button>
     `
     : "";
+  const popoverClass = popoverHtml
+    ? ` instance-tag-popover-anchor${popoverPinned ? " is-popover-pinned" : ""}`
+    : "";
+  const popoverAttrs = popoverHtml
+    ? ` data-instance-tag-popover-anchor="true" data-id="${escapeHtml(instanceId)}"`
+    : "";
 
   return `
-    <div class="tag-selector ${open ? "is-open" : ""} ${editable ? "" : "is-readonly"}">
+    <div class="tag-selector ${open ? "is-open" : ""} ${editable ? "" : "is-readonly"}${popoverClass}"${popoverAttrs}>
       <div class="tag-selector-input-wrap">
         ${chips}
         ${readonlyPlaceholder}
@@ -468,6 +477,7 @@ function renderTagSelector({
           `
           : ""
       }
+      ${popoverHtml}
     </div>
   `;
 }

@@ -218,7 +218,7 @@
 
 .instance-inline-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
   gap: 4px;
   min-width: 0;
@@ -232,10 +232,12 @@
 
 .instance-inline-actions .tag-selector-input-wrap {
   flex-wrap: nowrap;
+  align-items: center;
   gap: 4px;
-  min-height: 30px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  overflow: hidden;
   white-space: nowrap;
 }
 
@@ -246,6 +248,7 @@
 
 .instance-inline-actions .tag-chip {
   flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .submit-instance-button,
@@ -265,6 +268,16 @@
 
 .instance-action-slot-spacer {
   visibility: hidden;
+}
+
+.instance-card .instance-actions {
+  justify-content: space-between;
+  gap: 0;
+}
+
+.instance-card .instance-action-slot-spacer {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .instance-card.is-pending {
@@ -830,6 +843,56 @@ button.operation-provider-marker {
   background: transparent;
   color: var(--muted);
   line-height: 1;
+}
+
+.instance-tag-popover {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  z-index: 220;
+  display: none;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  min-width: min(180px, calc(100vw - 24px));
+  max-width: min(360px, calc(100vw - 24px));
+  max-height: min(360px, calc(100vh - 24px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%);
+}
+
+.instance-tag-popover-anchor:hover .instance-tag-popover,
+.instance-tag-popover-anchor.is-popover-pinned .instance-tag-popover {
+  display: flex;
+}
+
+.instance-tag-popover .tag-chip {
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.instance-tag-popover .tag-chip button {
+  flex: 0 0 auto;
+}
+
+.instance-tag-popover-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.instance-tag-popover-empty {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .path-row {

@@ -364,6 +364,25 @@ function renderInstanceSelection(instance, pending) {
   `;
 }
 
+function renderInstanceTagPopover(item, editable) {
+  const tags = Array.isArray(item.tags) ? item.tags : [];
+  const instanceId = escapeHtml(item.id);
+  const chips = tags.map((tag, index) => `
+    <span class="tag-chip instance-tag-popover-chip">
+      <span class="instance-tag-popover-label">${escapeHtml(tag)}</span>
+      ${editable
+        ? `<button type="button" data-action="remove-instance-tag" data-id="${instanceId}" data-index="${index}" aria-label="移除标签 ${escapeHtml(tag)}">×</button>`
+        : ""}
+    </span>
+  `).join("");
+
+  return `
+    <div class="instance-tag-popover" data-instance-tag-popover="true" role="group" aria-label="完整标签">
+      ${chips || `<span class="instance-tag-popover-empty">暂无标签</span>`}
+    </div>
+  `;
+}
+
 function renderInstanceCard(instance) {
   const pending = isRunningInstance(instance);
   const draft = pending ? null : editingDraft(instance);
@@ -440,6 +459,11 @@ function renderInstanceCard(instance) {
     editable: tagEditable,
     instanceId,
     open: Boolean(item.tag_selector_open),
+    popoverHtml: renderInstanceTagPopover(item, tagEditable),
+    popoverPinned: Boolean(
+      state.instanceTagPopover?.pinned
+      && String(state.instanceTagPopover.instanceId) === String(instanceId)
+    ),
   });
   const inlineActions = pending
     ? `

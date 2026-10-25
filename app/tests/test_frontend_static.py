@@ -5404,3 +5404,47 @@ def test_v071_new_shared_adapters_and_provider_marker_tristate():
     assert "marker === \"unused\" ? \"-\"" in providers_js
     assert ".operation-provider-marker.is-unused" in css
 
+
+
+
+def test_v0741_instance_tag_popover_and_card_action_alignment():
+    state_js = (ROOT / "frontend" / "js" / "state.js").read_text(encoding="utf-8")
+    render_instance_js = (ROOT / "frontend" / "js" / "render-instance.js").read_text(encoding="utf-8")
+    render_operation_js = (ROOT / "frontend" / "js" / "render-operation.js").read_text(encoding="utf-8")
+    events_js = (ROOT / "frontend" / "js" / "events.js").read_text(encoding="utf-8")
+    css = (ROOT / "frontend" / "css" / "06-instance-card.css").read_text(encoding="utf-8")
+
+    popover_renderer = render_instance_js[
+        render_instance_js.find("function renderInstanceTagPopover") :
+        render_instance_js.find("function renderInstanceCard")
+    ]
+    selector_renderer = render_operation_js[
+        render_operation_js.find("function renderTagSelector") :
+        render_operation_js.find("function renderAspectRatioPicker")
+    ]
+    inline_actions_css = css[
+        css.find(".instance-inline-actions {") :
+        css.find(".submit-instance-button,")
+    ]
+    tag_box_css = css[
+        css.find(".instance-inline-actions .tag-selector-input-wrap {") :
+        css.find(".instance-inline-actions .tag-selector-input-wrap input")
+    ]
+
+    assert 'instanceTagPopover: {' in state_js
+    assert 'popoverHtml: renderInstanceTagPopover(item, tagEditable)' in render_instance_js
+    assert 'data-action="remove-instance-tag"' in popover_renderer
+    assert 'data-instance-tag-popover="true"' in popover_renderer
+    assert 'popoverHtml = ""' in selector_renderer
+    assert 'data-instance-tag-popover-anchor="true"' in selector_renderer
+    assert 'function positionInstanceTagPopover(anchor)' in events_js
+    assert 'closeInstanceTagPopoverForOutsidePointerDown' in events_js
+    assert 'setInstanceTagPopoverPinned(tagPopoverAnchor.dataset.id, true)' in events_js
+    assert 'globalThis.positionActiveInstanceTagPopover?.();' in render_operation_js
+    assert 'align-items: flex-end;' in inline_actions_css
+    assert 'height: 34px;' in tag_box_css
+    assert 'overflow: hidden;' in tag_box_css
+    assert 'overflow-x: auto;' not in tag_box_css
+    assert '.instance-tag-popover-anchor:hover .instance-tag-popover' in css
+    assert '.instance-card .instance-actions {' in css
+    assert 'flex: 1 1 auto;' in css[css.find(".instance-card .instance-action-slot-spacer") :]

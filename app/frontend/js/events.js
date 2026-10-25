@@ -122,6 +122,129 @@ function closeNodeMenusForOutsidePointerDown(event) {
   renderManagerIfActive();
 }
 
+function positionInstanceTagPopover(anchor) {
+  const popover = anchor?.querySelector?.("[data-instance-tag-popover]");
+  if (!popover) {
+    return;
+  }
+
+  const anchorRect = anchor.getBoundingClientRect();
+  const viewportPadding = 12;
+  const gap = 8;
+  const maxWidth = Math.max(120, Math.min(360, window.innerWidth - viewportPadding * 2));
+  const maxHeight = Math.max(80, Math.min(360, window.innerHeight - viewportPadding * 2));
+  const leftSpace = anchorRect.left - viewportPadding - gap;
+  const rightSpace = window.innerWidth - anchorRect.right - viewportPadding - gap;
+  const previousDisplay = popover.style.display;
+  const previousVisibility = popover.style.visibility;
+
+  popover.style.maxWidth = `${maxWidth}px`;
+  popover.style.maxHeight = `${maxHeight}px`;
+  popover.style.visibility = "hidden";
+  popover.style.display = "flex";
+
+  let popoverRect = popover.getBoundingClientRect();
+  let popoverWidth = popoverRect.width || maxWidth;
+  let popoverHeight = popoverRect.height || Math.min(120, maxHeight);
+
+  if (leftSpace < popoverWidth && rightSpace < popoverWidth) {
+    const aboveSpace = anchorRect.top - viewportPadding - gap;
+    const belowSpace = window.innerHeight - anchorRect.bottom - viewportPadding - gap;
+    const verticalRoom = Math.max(80, Math.max(aboveSpace, belowSpace));
+    popover.style.maxHeight = `${Math.min(maxHeight, verticalRoom)}px`;
+    popoverRect = popover.getBoundingClientRect();
+    popoverWidth = popoverRect.width || maxWidth;
+    popoverHeight = popoverRect.height || Math.min(120, maxHeight);
+  }
+
+  popover.style.display = previousDisplay;
+  popover.style.visibility = previousVisibility;
+  popover.style.position = "fixed";
+  popover.style.right = "auto";
+
+  let left;
+  let top;
+  if (leftSpace >= popoverWidth) {
+    left = anchorRect.left - popoverWidth - gap;
+    top = anchorRect.top + anchorRect.height / 2 - popoverHeight / 2;
+  } else if (rightSpace >= popoverWidth) {
+    left = anchorRect.right + gap;
+    top = anchorRect.top + anchorRect.height / 2 - popoverHeight / 2;
+  } else {
+    left = Math.max(
+      viewportPadding,
+      Math.min(anchorRect.left, window.innerWidth - popoverWidth - viewportPadding),
+    );
+    const aboveSpace = anchorRect.top - viewportPadding - gap;
+    const belowSpace = window.innerHeight - anchorRect.bottom - viewportPadding - gap;
+    top = aboveSpace >= popoverHeight || aboveSpace >= belowSpace
+      ? anchorRect.top - popoverHeight - gap
+      : anchorRect.bottom + gap;
+  }
+
+  top = Math.max(
+    viewportPadding,
+    Math.min(top, window.innerHeight - popoverHeight - viewportPadding),
+  );
+  popover.style.left = `${Math.round(left)}px`;
+  popover.style.top = `${Math.round(top)}px`;
+  popover.style.transform = "none";
+}
+
+function setInstanceTagPopoverPinned(instanceId, pinned) {
+  const id = String(instanceId || "");
+  state.instanceTagPopover = {
+    instanceId: pinned ? id : "",
+    pinned: Boolean(pinned),
+  };
+
+  app.querySelectorAll("[data-instance-tag-popover-anchor]").forEach((anchor) => {
+    const isPinned = Boolean(pinned) && String(anchor.dataset.id || "") === id;
+    anchor.classList.toggle("is-popover-pinned", isPinned);
+    if (isPinned) {
+      positionInstanceTagPopover(anchor);
+    }
+  });
+}
+
+function positionActiveInstanceTagPopover() {
+  const hoveredAnchors = app.querySelectorAll("[data-instance-tag-popover-anchor]:hover");
+  hoveredAnchors.forEach((anchor) => positionInstanceTagPopover(anchor));
+
+  if (!state.instanceTagPopover?.pinned) {
+    return;
+  }
+  const pinnedId = String(state.instanceTagPopover.instanceId || "");
+  const pinnedAnchor = [...app.querySelectorAll("[data-instance-tag-popover-anchor]")]
+    .find((anchor) => String(anchor.dataset.id || "") === pinnedId);
+  if (pinnedAnchor && !pinnedAnchor.matches(":hover")) {
+    positionInstanceTagPopover(pinnedAnchor);
+  }
+}
+
+function closeInstanceTagPopoverForOutsidePointerDown(event) {
+  if (!state.instanceTagPopover?.pinned) {
+    return;
+  }
+
+  const pinnedId = String(state.instanceTagPopover.instanceId || "");
+  const popover = event.target?.closest?.("[data-instance-tag-popover]");
+  const popoverAnchor = popover?.closest?.("[data-instance-tag-popover-anchor]");
+  const tagBox = event.target?.closest?.(".tag-selector-input-wrap");
+  const tagBoxAnchor = tagBox?.closest?.("[data-instance-tag-popover-anchor]");
+  const insidePinnedPopover = popoverAnchor
+    && String(popoverAnchor.dataset.id || "") === pinnedId;
+  const insidePinnedTagBox = tagBoxAnchor
+    && String(tagBoxAnchor.dataset.id || "") === pinnedId;
+
+  if (insidePinnedPopover || insidePinnedTagBox) {
+    return;
+  }
+  setInstanceTagPopoverPinned("", false);
+}
+
+globalThis.positionActiveInstanceTagPopover = positionActiveInstanceTagPopover;
+
 app.addEventListener("click", async (event) => {
   const imageSlot = event.target.closest("[data-image-path]");
   if (!imageSlot) {
@@ -136,6 +259,20 @@ app.addEventListener("click", async (event) => {
   closeHistoryTextPopover();
   const actionNode = event.target.closest("[data-action]");
   const action = actionNode?.dataset.action;
+  const tagPopoverAnchor = event.target.closest("[data-instance-tag-popover-anchor]");
+  const tagPopover = event.target.closest("[data-instance-tag-popover]");
+  if (action === "remove-instance-tag" && tagPopover && tagPopoverAnchor) {
+    setInstanceTagPopoverPinned(tagPopoverAnchor.dataset.id, true);
+  } else if (
+    tagPopoverAnchor
+    && app.contains(tagPopoverAnchor)
+    && !event.target.closest("input, button, .tag-selector-menu, [data-instance-tag-popover]")
+  ) {
+    const instanceId = String(tagPopoverAnchor.dataset.id || "");
+    const alreadyPinned = Boolean(state.instanceTagPopover?.pinned)
+      && String(state.instanceTagPopover.instanceId || "") === instanceId;
+    setInstanceTagPopoverPinned(instanceId, !alreadyPinned);
+  }
   const closedDropdowns = closeFloatingDropdownsForClick(event.target);
   if (actionNode) {
     setClipboardImageTargetFromNode(actionNode, { render: false });
@@ -837,6 +974,10 @@ app.addEventListener("click", async (event) => {
 });
 
 app.addEventListener("pointerover", (event) => {
+  const tagPopoverAnchor = event.target.closest("[data-instance-tag-popover-anchor]");
+  if (tagPopoverAnchor && app.contains(tagPopoverAnchor)) {
+    positionInstanceTagPopover(tagPopoverAnchor);
+  }
   const historyPopoverSource = event.target.closest("[data-history-popover-source]");
   if (historyPopoverSource && app.contains(historyPopoverSource)) {
     if (suppressHistoryPopoverHoverUntilLeave || historyPopoverSource.dataset.historyPopoverSuppressHover === "true") {
@@ -1305,6 +1446,9 @@ function handleSaveAreaKeyboardPaging(event) {
 
 document.addEventListener("pointerdown", handleSaveAreaKeyboardFocusPointerDown, true);
 document.addEventListener("focusin", handleSaveAreaKeyboardFocusIn, true);
+document.addEventListener("pointerdown", closeInstanceTagPopoverForOutsidePointerDown, true);
+window.addEventListener("resize", positionActiveInstanceTagPopover);
+document.addEventListener("scroll", positionActiveInstanceTagPopover, true);
 document.addEventListener("pointerdown", (event) => {
   markManagerInteraction(event.target);
 }, true);

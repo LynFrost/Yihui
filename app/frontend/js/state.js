@@ -23,6 +23,10 @@ const state = {
   settingsEditingProvider: "",
   settingsDirty: false,
   instanceModelDropdownOpenKey: "",
+  instanceTagPopover: {
+    instanceId: "",
+    pinned: false,
+  },
   isComposingPrompt: false,
   saveViewMode: "list",
   saveAreaKeyboardFocus: false,
