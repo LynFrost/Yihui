@@ -160,6 +160,11 @@ def test_successful_model_verification_is_provider_scoped_and_persistent(tmp_pat
     settings["providers"][provider_b] = second_provider
     saved = client.put("/api/settings", json=settings)
     assert saved.status_code == 200
+    added_to_b = client.post(
+        "/api/provider-models",
+        json={"action": "add", "provider_key": provider_b, "model": shared_model},
+    )
+    assert added_to_b.status_code == 200
 
     added = client.post(
         "/api/provider-models",
