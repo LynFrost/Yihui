@@ -331,7 +331,7 @@ def normalize_provider_model_candidates(
         if len(normalized) >= max_items:
             break
     current = str(current_model or "").strip()
-    if current and current not in seen:
+    if current and current not in positions:
         if len(normalized) >= max_items:
             normalized = normalized[: max_items - 1]
         normalized.insert(0, {"id": current, "verified": False})
